@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 minios_disk.json
 docs/scripts/
+AGENTS.md
