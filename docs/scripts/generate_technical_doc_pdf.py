@@ -1,13 +1,13 @@
 """
-Direct Markdown-to-PDF compiler for docs/User_Manual.md
-Reads the actual User_Manual.md file and generates docs/User_Manual.pdf using fpdf2.
+Markdown-to-PDF compiler for docs/Technical_Documentation.md
+Reads docs/Technical_Documentation.md directly and compiles docs/Technical_Documentation.pdf using fpdf2.
 """
 
 import os
 import re
 from fpdf import FPDF
 
-class UserManualPDF(FPDF):
+class TechnicalDocPDF(FPDF):
     def __init__(self, project_title="IT 3131 Final Project"):
         super().__init__(orientation="P", unit="mm", format="A4")
         self.set_auto_page_break(auto=True, margin=15)
@@ -17,7 +17,7 @@ class UserManualPDF(FPDF):
     def header(self):
         self.set_font("Helvetica", "B", 8)
         self.set_text_color(90, 100, 115)
-        self.cell(0, 5, "MiniOS Alpha -- User Manual", border=0, align="L")
+        self.cell(0, 5, "MiniOS Alpha -- Technical Documentation", border=0, align="L")
         self.cell(0, 5, self.project_title, border=0, align="R", new_x="LMARGIN", new_y="NEXT")
         self.set_draw_color(200, 205, 215)
         self.set_line_width(0.3)
@@ -31,7 +31,7 @@ class UserManualPDF(FPDF):
         self.line(15, self.h - 12, self.w - 15, self.h - 12)
         self.set_font("Helvetica", "", 8)
         self.set_text_color(110, 115, 125)
-        self.cell(0, 8, "MiniOS Alpha Simulator", border=0, align="L")
+        self.cell(0, 8, "MiniOS Alpha Simulator -- System Architecture & Design", border=0, align="L")
         self.cell(0, 8, f"Page {self.page_no()}", border=0, align="R")
 
     def sanitize(self, text):
@@ -43,6 +43,18 @@ class UserManualPDF(FPDF):
             .replace("”", '"')
             .replace("‘", "'")
             .replace("’", "'")
+            .replace("→", "->")
+            .replace("≤", "<=")
+            .replace("≥", ">=")
+            .replace("├──", "|--")
+            .replace("└──", "`--")
+            .replace("│", "|")
+            .replace("─", "-")
+            .replace("├", "|")
+            .replace("└", "`")
+            .replace("┌", "+")
+            .replace("┐", "+")
+            .replace("┼", "+")
         )
 
     def render_doc_header(self, title, metadata):
@@ -51,7 +63,7 @@ class UserManualPDF(FPDF):
         self.set_text_color(20, 35, 60)
         self.cell(0, 8, self.sanitize(title), border=0, align="L", new_x="LMARGIN", new_y="NEXT")
         
-        self.set_font("Helvetica", "", 9)
+        self.set_font("Helvetica", "", 8.5)
         self.set_text_color(80, 90, 105)
         meta_str = " | ".join(metadata)
         self.cell(0, 5, self.sanitize(meta_str), border=0, align="L", new_x="LMARGIN", new_y="NEXT")
@@ -62,7 +74,9 @@ class UserManualPDF(FPDF):
         self.ln(4)
 
     def h2(self, text):
-        self.ln(2)
+        if self.get_y() > self.h - 35:
+            self.add_page()
+        self.ln(2.5)
         self.set_font("Helvetica", "B", 11)
         self.set_text_color(25, 45, 80)
         self.set_fill_color(240, 244, 250)
@@ -70,46 +84,26 @@ class UserManualPDF(FPDF):
         self.ln(1.5)
 
     def h3(self, text):
+        if self.get_y() > self.h - 30:
+            self.add_page()
         self.ln(1.5)
         self.set_font("Helvetica", "B", 9.5)
         self.set_text_color(40, 60, 95)
         self.cell(0, 5, self.sanitize(text), border=0, align="L", new_x="LMARGIN", new_y="NEXT")
         self.ln(0.5)
 
-    def command_header(self, name):
-        if self.get_y() > self.h - 38:
-            self.add_page()
-        self.ln(1)
-        self.set_font("Helvetica", "B", 9)
-        self.set_text_color(20, 40, 80)
-        self.cell(0, 5, f"COMMAND: {self.sanitize(name)}", border=0, new_x="LMARGIN", new_y="NEXT")
-
     def para(self, text):
         self.set_font("Helvetica", "", 8.5)
         self.set_text_color(40, 45, 55)
         self.multi_cell(0, 4.2, self.sanitize(text))
-        self.ln(1)
+        self.ln(1.2)
 
     def bullet(self, text):
         self.set_font("Helvetica", "", 8.5)
         self.set_text_color(40, 45, 55)
         self.cell(4, 4.2, "-", border=0)
         self.multi_cell(0, 4.2, self.sanitize(text))
-        self.ln(0.5)
-
-    def key_val(self, key, val, val_is_code=False):
-        self.set_font("Helvetica", "B", 8)
-        self.set_text_color(70, 75, 85)
-        self.set_x(15)
-        self.cell(16, 4, f"{key}:", border=0)
-        self.set_x(31)
-        if val_is_code:
-            self.set_font("Courier", "B", 8)
-            self.set_text_color(20, 30, 55)
-        else:
-            self.set_font("Helvetica", "", 8)
-            self.set_text_color(35, 40, 50)
-        self.multi_cell(self.w - 31 - 15, 4, self.sanitize(val))
+        self.ln(0.6)
 
     def code_box(self, code_text):
         lines = self.sanitize(code_text).strip("\n").split("\n")
@@ -134,20 +128,58 @@ class UserManualPDF(FPDF):
     def render_table(self, headers, rows):
         if self.get_y() > self.h - 35:
             self.add_page()
+            
+        num_cols = len(headers)
+        avail_w = self.w - 30
+        
+        # Determine column widths based on number of columns
+        if num_cols == 3:
+            col_widths = [32, 45, avail_w - 77]
+        elif num_cols == 4:
+            col_widths = [30, 30, 95, avail_w - 155]
+        else:
+            col_widths = [avail_w / num_cols] * num_cols
+
         self.set_font("Helvetica", "B", 8)
         self.set_fill_color(230, 238, 248)
         self.set_draw_color(200, 210, 225)
         
-        col_w = (self.w - 30) / len(headers)
-        for h in headers:
-            self.cell(col_w, 5, self.sanitize(h), border=1, fill=True, align="L")
+        for idx, h in enumerate(headers):
+            self.cell(col_widths[idx], 5, self.sanitize(h), border=1, fill=True, align="L")
         self.ln()
         
-        self.set_font("Helvetica", "", 8)
+        self.set_font("Helvetica", "", 7.5)
+        self.set_text_color(35, 40, 50)
         for row in rows:
-            for cell in row:
-                self.cell(col_w, 4.5, self.sanitize(cell), border=1, align="L")
-            self.ln()
+            max_lines = 1
+            # Check for multi-line cells
+            for idx, cell in enumerate(row):
+                w = col_widths[idx]
+                lines_in_cell = len(self.multi_cell(w, 3.8, self.sanitize(cell), dry_run=True, output="LINES"))
+                if lines_in_cell > max_lines:
+                    max_lines = lines_in_cell
+            
+            row_h = max_lines * 3.8 + 2
+            if self.get_y() + row_h > self.h - 15:
+                self.add_page()
+                # Re-render header on new page
+                self.set_font("Helvetica", "B", 8)
+                self.set_fill_color(230, 238, 248)
+                for idx, h in enumerate(headers):
+                    self.cell(col_widths[idx], 5, self.sanitize(h), border=1, fill=True, align="L")
+                self.ln()
+                self.set_font("Helvetica", "", 7.5)
+            
+            cur_x = 15
+            cur_y = self.get_y()
+            for idx, cell in enumerate(row):
+                w = col_widths[idx]
+                self.rect(cur_x, cur_y, w, row_h)
+                self.set_xy(cur_x + 1, cur_y + 1)
+                self.multi_cell(w - 2, 3.8, self.sanitize(cell))
+                cur_x += w
+            self.set_y(cur_y + row_h)
+            
         self.ln(2)
 
 def build_pdf_from_md(md_path, pdf_path):
@@ -160,15 +192,16 @@ def build_pdf_from_md(md_path, pdf_path):
         if "**Project:**" in line:
             project_title = line.split("**Project:**")[1].strip()
 
-    pdf = UserManualPDF(project_title=project_title)
+    pdf = TechnicalDocPDF(project_title=project_title)
     pdf.add_page()
 
     lines = md_text.splitlines()
     i = 0
     in_code = False
+    code_lang = ""
     code_buffer = []
 
-    doc_title = "MiniOS Alpha -- User Manual"
+    doc_title = "MiniOS Alpha -- Technical Documentation"
     metadata = []
 
     while i < len(lines):
@@ -179,10 +212,17 @@ def build_pdf_from_md(md_path, pdf_path):
         if stripped.startswith("```"):
             if in_code:
                 in_code = False
-                pdf.code_box("\n".join(code_buffer))
+                # If mermaid diagram, render clean text representation or diagram
+                if code_lang == "mermaid":
+                    # Format as clean text flow block
+                    pdf.code_box("\n".join(code_buffer))
+                else:
+                    pdf.code_box("\n".join(code_buffer))
                 code_buffer = []
+                code_lang = ""
             else:
                 in_code = True
+                code_lang = stripped[3:].strip()
                 code_buffer = []
             i += 1
             continue
@@ -197,19 +237,33 @@ def build_pdf_from_md(md_path, pdf_path):
             i += 1
             continue
 
-        # Title
+        # Document Title
         if stripped.startswith("# "):
             doc_title = stripped[2:].strip()
             i += 1
             continue
 
         # Metadata under title
-        if stripped.startswith("**Operating System:**") or stripped.startswith("**Project:**"):
+        if (
+            stripped.startswith("**Operating System:**")
+            or stripped.startswith("**Project:**")
+            or stripped.startswith("**Group:**")
+            or stripped.startswith("**File Target:**")
+        ):
             clean_meta = stripped.replace("**", "").replace("`", "")
             metadata.append(clean_meta)
-            if len(metadata) == 2:
+            if len(metadata) == 4:
                 pdf.render_doc_header(doc_title, metadata)
             i += 1
+            continue
+
+        # Skip Table of Contents block for clean presentation
+        if stripped == "## Table of Contents":
+            i += 1
+            while i < len(lines) and (lines[i].strip().startswith("1") or lines[i].strip() == "" or "[" in lines[i]):
+                if lines[i].strip().startswith("## "):
+                    break
+                i += 1
             continue
 
         # H2
@@ -221,41 +275,6 @@ def build_pdf_from_md(md_path, pdf_path):
         # H3
         if stripped.startswith("### "):
             pdf.h3(stripped[4:].strip())
-            i += 1
-            continue
-
-        # COMMAND:
-        if stripped.startswith("#### COMMAND:"):
-            cmd_name = stripped.split("#### COMMAND:")[1].strip()
-            pdf.command_header(cmd_name)
-            i += 1
-            continue
-
-        # Purpose, Syntax, Example
-        if stripped.startswith("**Purpose:**"):
-            purpose_text = stripped.replace("**Purpose:**", "").strip()
-            # If purpose is on next line
-            if not purpose_text and i + 1 < len(lines):
-                i += 1
-                purpose_text = lines[i].strip()
-            pdf.key_val("Purpose", purpose_text)
-            i += 1
-            continue
-
-        if stripped.startswith("**Syntax:**"):
-            syntax_text = stripped.replace("**Syntax:**", "").strip()
-            if not syntax_text and i + 1 < len(lines):
-                i += 1
-                syntax_text = lines[i].strip()
-            syntax_clean = syntax_text.replace("`", "")
-            pdf.key_val("Syntax", syntax_clean, val_is_code=True)
-            i += 1
-            continue
-
-        if stripped.startswith("**Example:**"):
-            pdf.set_font("Helvetica", "B", 8)
-            pdf.set_text_color(70, 75, 85)
-            pdf.cell(0, 4, "Example:", border=0, new_x="LMARGIN", new_y="NEXT")
             i += 1
             continue
 
@@ -299,6 +318,17 @@ def build_pdf_from_md(md_path, pdf_path):
     print(f"Successfully generated {pdf_path} from {md_path}")
 
 if __name__ == "__main__":
-    md_file = os.path.abspath("docs/User_Manual.md")
-    pdf_file = os.path.abspath("docs/User_Manual.pdf")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(script_dir)) if os.path.basename(script_dir) == "scripts" else os.path.dirname(script_dir)
+    docs_dir = os.path.join(project_root, "docs")
+    
+    candidates = [
+        os.path.join(script_dir, "Technical_Documentation.md"),
+        os.path.join(docs_dir, "Technical_Documentation.md"),
+        os.path.abspath("docs/scripts/Technical_Documentation.md"),
+        os.path.abspath("docs/Technical_Documentation.md"),
+    ]
+    md_file = next((p for p in candidates if os.path.exists(p)), candidates[0])
+    pdf_file = os.path.join(docs_dir, "Technical_Documentation.pdf")
+    
     build_pdf_from_md(md_file, pdf_file)

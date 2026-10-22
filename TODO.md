@@ -9,19 +9,19 @@
   - [x] 6. Complete Command Reference (Name, Purpose, Syntax, Example for every command)
   - [x] 7. Common Errors & Troubleshooting
   - [x] 8. How to Exit MiniOS
-- [ ] **`docs/Technical_Documentation.pdf` (§23):**
-  - [ ] 1. Introduction & Project Scope
-  - [ ] 2. Project Objectives
-  - [ ] 3. System Architecture (Component Diagram: Shell → Files, Processes, Memory, Users, System Info)
-  - [ ] 4. Program Structure (`main.py`, `filesystem.py`, `processes.py`, `memory.py`, `users.py`)
-  - [ ] 5. File Management Architecture (in-memory tree & JSON persistence)
-  - [ ] 6. Process Simulation Design (PID management, states, limits)
-  - [ ] 7. Memory Simulation Design (RAM partitioning, allocation/release logic)
-  - [ ] 8. User Authentication System (SHA-256 hashing, session state)
-  - [ ] 9. Error Handling & Shell Stability
-  - [ ] 10. Verification & Test Plan (unit tests, interactive tests)
-  - [ ] 11. Problems Encountered & Technical Solutions
-  - [ ] 12. Conclusion & Operating Systems Concepts Demonstrated
+- [x] **`docs/Technical_Documentation.pdf` (§23):**
+  - [x] 1. Introduction & Project Scope
+  - [x] 2. Project Objectives
+  - [x] 3. System Architecture (Component Diagram: Shell → Files, Processes, Memory, Users, System Info)
+  - [x] 4. Program Structure (`main.py`, `filesystem.py`, `processes.py`, `memory.py`, `users.py`)
+  - [x] 5. File Management Architecture (in-memory tree & JSON persistence)
+  - [x] 6. Process Simulation Design (PID management, states, limits)
+  - [x] 7. Memory Simulation Design (RAM partitioning, allocation/release logic)
+  - [x] 8. User Authentication System (SHA-256 hashing, session state)
+  - [x] 9. Error Handling & Shell Stability
+  - [x] 10. Verification & Test Plan (unit tests, interactive tests)
+  - [x] 11. Problems Encountered & Technical Solutions
+  - [x] 12. Conclusion & Operating Systems Concepts Demonstrated
 
 ## 4. Screenshots Deliverables (`screenshots/`) (§24)
 
