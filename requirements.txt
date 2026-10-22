@@ -1,0 +1,16 @@
+# MiniOS Alpha Requirements
+# MiniOS Alpha runs entirely on standard library modules included with Python 3.8+.
+# No external third-party dependencies (pip packages) are required.
+
+# Runtime:
+# python >= 3.8
+
+# Standard Library Modules Utilized:
+# - os
+# - sys
+# - time
+# - datetime
+# - json
+# - hashlib
+# - getpass
+# - platform
