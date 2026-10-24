@@ -75,7 +75,7 @@ You will create a program that looks and behaves like a simple command-line oper
 For example:
 
 ========================================
-GrouName MINI OS ALPHA v1.0
+GroupName MINI OS ALPHA v1.0
 ========================================
 
 Welcome to MiniOS!

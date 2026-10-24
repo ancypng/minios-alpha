@@ -14,7 +14,7 @@ It is **not** a real bootable operating system.
 
 ## Features
 
-- Command-line interface with its own `MiniOS>` prompt
+- Command-line interface with its own `MiniOS Alpha>` prompt
 - File management (simulated file system, saved to `minios_disk.json`)
 - Process simulation (run, list, kill)
 - Memory simulation (1024 MB total, 256 MB reserved by the "kernel")

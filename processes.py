@@ -1,20 +1,20 @@
 """Simulated process management for MiniOS Alpha."""
-
 from datetime import datetime
 
 
 class ProcessError(Exception):
-    pass
+    """Raised for any user-facing process problem."""
 
 
 class ProcessManager:
     MAX_PROCESSES = 10
 
     def __init__(self):
-        self._procs = {}
+        self._procs = {}    # pid -> process information
         self._next_pid = 1
 
     def run(self, name):
+        """Start a new simulated process and return its information."""
         if len(self._procs) >= self.MAX_PROCESSES:
             raise ProcessError(
                 f"Process limit reached ({self.MAX_PROCESSES}). Kill one first."
@@ -30,12 +30,14 @@ class ProcessManager:
         return self._procs[pid]
 
     def kill(self, pid):
+        """Terminate a process and return its information."""
         if pid not in self._procs:
-            raise ProcessError("Process does not exist.")
+            raise ProcessError(f"Process {pid} does not exist.")
         return self._procs.pop(pid)
 
     def list(self):
-        return [self._procs[p] for p in sorted(self._procs)]
+        """Return all processes, sorted by PID."""
+        return [self._procs[pid] for pid in sorted(self._procs)]
 
     def count(self):
         return len(self._procs)

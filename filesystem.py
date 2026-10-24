@@ -1,10 +1,13 @@
 """Simulated file system for MiniOS Alpha.
 
-Files and directories live in a tree of Python dictionaries. The tree is saved
-to minios_disk.json so files survive between runs. Nothing touches the real disk
-except that one JSON file.
-"""
+Files and directories live in a tree of Python dictionaries:
 
+    directory -> {"type": "dir",  "children": {name: node, ...}}
+    file      -> {"type": "file", "content": "text"}
+
+The tree is saved to minios_disk.json so files survive between runs.
+Nothing touches the real disk except that one JSON file.
+"""
 import json
 import os
 
@@ -24,32 +27,35 @@ class FileSystem:
     def __init__(self, disk_file=DISK_FILE):
         self.disk_file = disk_file
         self.root = _new_dir()
-        self.cwd = []  # list of directory names from the root
+        self.cwd = []  # names of the folders from the root to the current folder
         self._load()
 
-    # ---------- persistence ----------
+    # ------------------------------------------------------------
+    # Saving and loading
+    # ------------------------------------------------------------
     def _load(self):
         try:
-            with open(self.disk_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            with open(self.disk_file, "r", encoding="utf-8") as file:
+                data = json.load(file)
             if data.get("type") == "dir":
                 self.root = data
         except (OSError, ValueError):
-            self.root = _new_dir()
+            self.root = _new_dir()  # missing or damaged disk -> start empty
 
     def _save(self):
         try:
-            with open(self.disk_file, "w", encoding="utf-8") as f:
-                json.dump(self.root, f, indent=2)
+            with open(self.disk_file, "w", encoding="utf-8") as file:
+                json.dump(self.root, file, indent=2)
         except OSError:
             pass  # saving is a convenience; never crash the shell
 
-    # ---------- path helpers ----------
+    # ------------------------------------------------------------
+    # Path helpers
+    # ------------------------------------------------------------
     def _parts(self, path):
-        if path.startswith(("/", "\\")):
-            parts = []
-        else:
-            parts = list(self.cwd)
+        """Turn a path like '..\\docs/a.txt' into a list of names."""
+        starts_at_root = path.startswith(("/", "\\"))
+        parts = [] if starts_at_root else list(self.cwd)
         for piece in path.replace("\\", "/").split("/"):
             if piece in ("", "."):
                 continue
@@ -61,6 +67,7 @@ class FileSystem:
         return parts
 
     def _node(self, parts):
+        """Follow a list of names down the tree and return that node."""
         node = self.root
         for name in parts:
             if node["type"] != "dir" or name not in node["children"]:
@@ -69,6 +76,7 @@ class FileSystem:
         return node
 
     def _parent_and_name(self, path):
+        """Return (parent directory node, last name) for a path."""
         parts = self._parts(path)
         if not parts:
             raise FileSystemError("Invalid name.")
@@ -79,46 +87,48 @@ class FileSystem:
 
     @staticmethod
     def _check_name(name):
-        if not name or any(c in INVALID_CHARS for c in name):
+        if not name or any(char in INVALID_CHARS for char in name):
             raise FileSystemError('Invalid name. Avoid / \\ : * ? " < > |')
 
+    def _add_node(self, path, node):
+        """Create a new file/folder, refusing duplicate names."""
+        parent, name = self._parent_and_name(path)
+        self._check_name(name)
+        if name in parent["children"]:
+            raise FileSystemError("A file or directory with that name already exists.")
+        parent["children"][name] = node
+        self._save()
+
     def pwd(self):
+        """Current directory as text, e.g. \\Documents\\School"""
         return "\\" + "\\".join(self.cwd)
 
-    # ---------- commands ----------
+    # ------------------------------------------------------------
+    # Commands
+    # ------------------------------------------------------------
     def listdir(self, path="."):
+        """Return a list of (name, is_directory, size) for a folder."""
         node = self._node(self._parts(path))
         if node["type"] != "dir":
             raise FileSystemError("Not a directory.")
-        rows = []
+        items = []
         for name in sorted(node["children"], key=str.lower):
             child = node["children"][name]
             if child["type"] == "dir":
-                rows.append(f"{'<DIR>':>10}  {name}")
+                items.append((name, True, 0))
             else:
-                rows.append(f"{len(child['content']):>10}  {name}")
-        return rows
+                items.append((name, False, len(child["content"])))
+        return items
 
     def mkdir(self, path):
-        parent, name = self._parent_and_name(path)
-        self._check_name(name)
-        if name in parent["children"]:
-            raise FileSystemError("A file or directory with that name already exists.")
-        parent["children"][name] = _new_dir()
-        self._save()
+        self._add_node(path, _new_dir())
 
     def create(self, path):
-        parent, name = self._parent_and_name(path)
-        self._check_name(name)
-        if name in parent["children"]:
-            raise FileSystemError("A file or directory with that name already exists.")
-        parent["children"][name] = {"type": "file", "content": ""}
-        self._save()
+        self._add_node(path, {"type": "file", "content": ""})
 
     def read(self, path):
-        parts = self._parts(path)
         try:
-            node = self._node(parts)
+            node = self._node(self._parts(path))
         except FileSystemError:
             raise FileSystemError("File does not exist.")
         if node["type"] != "file":
@@ -135,6 +145,7 @@ class FileSystem:
         self._save()
 
     def delete(self, path):
+        """Delete a file or an empty directory. Returns 'file' or 'dir'."""
         parent, name = self._parent_and_name(path)
         node = parent["children"].get(name)
         if node is None:
@@ -166,14 +177,15 @@ class FileSystem:
         self.cwd = parts
 
     def counts(self):
+        """Return (number of files, number of directories) in the whole disk."""
         files = dirs = 0
-        stack = [self.root]
-        while stack:
-            node = stack.pop()
-            for child in node["children"].values():
+        to_visit = [self.root]
+        while to_visit:
+            folder = to_visit.pop()
+            for child in folder["children"].values():
                 if child["type"] == "dir":
                     dirs += 1
-                    stack.append(child)
+                    to_visit.append(child)
                 else:
                     files += 1
         return files, dirs

@@ -23,7 +23,7 @@ MiniOS Alpha is a simple command-line operating system simulator written in Pyth
 
 1. Download or clone the project repository:
    ```cmd
-   git clone https://github.com/matthewsaint/minios-alpha.git
+   git clone https://github.com/ancypng/minios-alpha.git
    cd minios-alpha
    ```
 2. Verify Python is installed and accessible:
@@ -43,22 +43,30 @@ MiniOS Alpha is a simple command-line operating system simulator written in Pyth
    ```
 3. MiniOS displays the boot banner and prompts for login:
    ```
-   ========================================
-             MINI OS ALPHA v1.0
-   ========================================
+   ==================================================
+                MINIOS ALPHA v1.0
+         Operating Systems Final Project
+==================================================
 
-   Welcome to MiniOS!
+Welcome to MiniOS!
 
-   ========================================
-                 MiniOS Login
-   ========================================
-   Demo accounts: admin / admin123, student / student123
+Created by PE, BALICAO, MENDOZA, STP. THOMAS, TUMAYAO
 
-   Username:
+==================================================
+                   MiniOS Login
+==================================================
+Demo accounts: admin / admin123, student / student123
+
+Username: admin
+Password:
+
+[OK] Login successful. Welcome, admin!
+
+Type 'help' to see the available commands.
    ```
 4. After logging in, the shell prompt appears:
    ```
-   MiniOS>
+   MiniOS Alpha>
    ```
 
 ---
