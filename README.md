@@ -4,6 +4,9 @@ A command-line operating system simulator written in Python for the Operating Sy
 It runs in Windows Command Prompt (CMD) and simulates a shell, file system, processes, memory and users.
 It is **not** a real bootable operating system.
 
+GDRIVE: https://drive.google.com/drive/folders/1pE34qhFakVxaoAUfzAVj5DH_vObgWnE3?usp=drive_link
+Githun Repository: https://github.com/ancypng/minios-alpha
+
 ## Group Members
 
 1. Francyn Pe – Project Leader
