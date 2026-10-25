@@ -2,13 +2,18 @@
 
 Each team member must submit a PDF (`individual-reports/<name_or_student_id>.pdf`) answering:
 
-- [ ] Student Name, Group Name, Assigned Role (§17–18)
-- [ ] What did I contribute to the project?
-- [ ] What features did I personally develop?
-- [ ] What problems did I encounter?
-- [ ] How did I solve those problems?
-- [ ] What did I learn from this project?
-- [ ] Evidence of my contribution (commits, screenshots, code references)
+- [x] Student 1 (Project Leader) — Francyn Pe
+- [x] Student 2 (CLI Developer) — Matthew Sto. Tomas (`individual-reports/sto_tomas.pdf`)
+  - [x] Student Name, Group Name, Assigned Role (§17–18)
+  - [x] What did I contribute to the project?
+  - [x] What features did I personally develop?
+  - [x] What problems did I encounter?
+  - [x] How did I solve those problems?
+  - [x] What did I learn from this project?
+  - [x] Evidence of my contribution (commits, screenshots, code references)
+- [x] Student 3 (File Management Developer) — Kyle Patrick Mendoza
+- [x] Student 4 (Process and Memory Developer) — JC Gil Balicao (`individual-reports/balicao.pdf`)
+- [x] Student 5 (User/System Developer) — Jhetro Jade Tumayao (`individual-reports/tumayao.pdf`)
 
 ## 6. Demonstration Video (§26–28)
 
@@ -32,7 +37,7 @@ Each team member must submit a PDF (`individual-reports/<name_or_student_id>.pdf
 - [x] Remote GitHub repository (`minios-alpha`) created and pushed.
 - [x] Ensure repository is accessible to the instructor.
 - [ ] Canvas LMS Submission prepared:
-  - [ ] Group Name: `MiniOS Alpha` (Group 1)
-  - [ ] Full list of Group Members & student numbers
-  - [ ] Working GitHub Repository link
+  - [x] Group Name: `MiniOS Alpha` (Group 1)
+  - [x] Full list of Group Members & student numbers
+  - [x] Working GitHub Repository link
   - [ ] Working Demo Video link (Google Drive / YouTube)
